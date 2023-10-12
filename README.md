@@ -97,7 +97,6 @@ Clone this repository to your desired folder:
 
 ## 🔭 Future Features <a name="future-features"></a>
 
- -  Decorate classes;
  -  set up associations;
  -  add basic UI;
 
