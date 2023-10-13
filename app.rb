@@ -162,4 +162,3 @@ class App
     puts 'Bye!'
   end
 end
-
