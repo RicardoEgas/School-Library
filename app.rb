@@ -34,6 +34,7 @@ class App
     end
   end
 
+  # rubocop:disable Metrics
   def handle_option(option)
     case option
     when 1 then list_books
@@ -47,6 +48,7 @@ class App
       puts 'Invalid Selection'
     end
   end
+  # rubocop:enable Metrics
 
   def list_books
     if @books.empty?
@@ -151,7 +153,7 @@ class App
 
   def display_rentals(rentals)
     if rentals.empty?
-      puts "There are currently no rented books for the given person ID."
+      puts 'There are currently no rented books for the given person ID.'
     else
       puts 'Rentals:'
       rentals.each { |rental| puts "Date: #{rental.date}, Book: \"#{rental.book.title}\" by #{rental.book.author}" }
