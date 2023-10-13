@@ -1,5 +1,5 @@
-require './book'
-require './rental'
+require_relative 'book'
+require_relative 'rental'
 require_relative 'persons'
 require_relative 'students'
 require_relative 'teachers'
@@ -11,14 +11,65 @@ class App
     @people = []
   end
 
-  def all_books
-    puts 'There are currently no recorded books in the system' if @books.empty?
-    @books.each { |book| puts "\nTitle: \"#{book.title}\", Author: #{book.author}" }
+  def run
+    display_menu
   end
 
-  def all_people
-    puts 'There are currently no recorded people in the system.' if @people.empty?
-    @people.each { |person| puts "\n[#{person.class}] Name: #{person.name}, ID: #{person.id}, Age: #{person.age}" }
+  private
+
+  def display_menu
+    loop do
+      puts "\nPlease choose an option by entering a number:"
+      puts '1 - List all books'
+      puts '2 - List all people'
+      puts '3 - Create a person'
+      puts '4 - Create a book'
+      puts '5 - Create a rental'
+      puts '6 - List all rentals for a given person id'
+      puts '7 - Exit'
+
+      option = gets.chomp.to_i
+      handle_option(option)
+      break if option == 7
+    end
+  end
+
+  def handle_option(option)
+    case option
+    when 1 then list_books
+    when 2 then list_people
+    when 3 then create_person
+    when 4 then create_book
+    when 5 then create_rental
+    when 6 then list_rentals_by_person_id
+    when 7 then exit_app
+    else
+      puts 'Invalid Selection'
+    end
+  end
+
+  def list_books
+    if @books.empty?
+      puts 'There are currently no recorded books in the system'
+    else
+      @books.each_with_index { |book, idx| display_book_info(book, idx) }
+    end
+  end
+
+  def list_people
+    if @people.empty?
+      puts 'There are currently no recorded people in the system.'
+    else
+      @people.each_with_index { |person, idx| display_person_info(person, idx) }
+    end
+  end
+
+  def display_book_info(book, idx)
+    puts "#{idx} - Title: \"#{book.title}\", Author: #{book.author}"
+  end
+
+  def display_person_info(person, idx)
+    puts "#{idx} - [#{person.class}] Name: #{person.name}, ID: #{person.id}, Age: #{person.age}"
   end
 
   def create_person
@@ -45,7 +96,7 @@ class App
     elsif parent_permission.downcase == 'y'
       student = Student.new('classroom', age, false, name)
     else
-      puts 'Invalid Selection'
+      puts 'Invalid Selection for parent permission'
       return
     end
     @people << student
@@ -71,16 +122,16 @@ class App
     author = gets.chomp
     book = Book.new(title, author)
     @books << book
-    puts 'Book created succesfully'
+    puts 'Book created successfully'
   end
 
   def create_rental
-    puts 'Select a book from the following lists'
-    @books.each_with_index { |book, idx| puts "#{idx}) Title: #{book.title}, Author: #{book.author}" }
+    list_books
+    print 'Select a book from the following lists '
     book_index = gets.chomp.to_i
 
-    puts 'Select a person from the following list by number (not id)'
-    @people.each_with_index { |person, idx| puts "#{idx}) Name: #{person.name}, ID: #{person.id}, AGE: #{person.age}" }
+    list_people
+    print 'Select a person from the following list by number (not id)'
     person_index = gets.chomp.to_i
 
     print 'Date: '
@@ -88,60 +139,22 @@ class App
 
     rental = Rental.new(@people[person_index], @books[book_index], date_of_rental)
     @rentals << rental
-    puts 'Rental created succesfully'
+    puts 'Rental created successfully'
   end
 
-  def list_rentals
+  def list_rentals_by_person_id
     print "\nID of the person: "
     person_id = gets.chomp.to_i
+    rentals = @rentals.select { |rental| rental.person.id == person_id }
+    display_rentals(rentals)
+  end
 
-    found_rentals = @rentals.select { |rental| rental.person.id == person_id }
-
-    if found_rentals.empty?
-      puts "There are currently no rented books in the system under #{person_id} id."
+  def display_rentals(rentals)
+    if rentals.empty?
+      puts "There are currently no rented books for the given person ID."
     else
       puts 'Rentals:'
-      found_rentals.each do |rental|
-        puts "Date: #{rental.date}, Book: \"#{rental.book.title}\" by #{rental.book.author}"
-      end
-    end
-  end
-
-  def menu
-    puts "\nPlease choose an option by entering a number:"
-    puts '1 - List all books'
-    puts '2 - List all people'
-    puts '3 - Create a person'
-    puts '4 - Create a book'
-    puts '5 - Create a rental'
-    puts '6 - List all rentals for a given person id'
-    puts '7 - Exit'
-
-    puts 'Waiting for your option'
-  end
-
-  def display
-    options = {
-      1 => method(:all_books),
-      2 => method(:all_people),
-      3 => method(:create_person),
-      4 => method(:create_book),
-      5 => method(:create_rental),
-      6 => method(:list_rentals),
-      7 => method(:exit_app)
-    }
-
-    loop do
-      menu
-      user_option = gets.chomp.to_i
-
-      if options.key?(user_option)
-        options[user_option].call
-      else
-        puts 'Invalid Selection'
-      end
-
-      break if user_option == 7
+      rentals.each { |rental| puts "Date: #{rental.date}, Book: \"#{rental.book.title}\" by #{rental.book.author}" }
     end
   end
 
@@ -149,3 +162,4 @@ class App
     puts 'Bye!'
   end
 end
+
